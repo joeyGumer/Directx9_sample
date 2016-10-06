@@ -8,6 +8,8 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
+#pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
+
 // include the Direct3D Library files
 #pragma comment (lib, "DirectX9/Lib/x86/d3d9.lib")
 //#pragma comment (lib, "DirectX9/Lib/x86/d3dx9.lib")
@@ -23,11 +25,10 @@ void cleanD3D(void); //closes and releases direct 3D
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-int WINAPI WinMain(HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-	LPSTR lpCmdLine,
-	int nCmdShow)
+//sOLVED TO USE MAIN INSTEad of WinMain
+int main(int nCmdShow)
 {
+	//Creating window
 	HWND hWnd;
 	WNDCLASSEX wc;
 
@@ -36,7 +37,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = WindowProc;
-	wc.hInstance = hInstance;
+	wc.hInstance = GetModuleHandle(0);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
 	wc.lpszClassName = "WindowClass";
@@ -46,15 +47,16 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	hWnd = CreateWindowEx(NULL,
 		"WindowClass",
 		"Our First Direct3D Program",
-		WS_OVERLAPPEDWINDOW,
-		300, 300,
-		800, 600,
+		WS_OVERLAPPEDWINDOW,	//Top window and without borders
+		300, 300,						 //Starting position of the window							
+		SCREEN_WIDTH, SCREEN_HEIGHT, //Resolution
 		NULL,
 		NULL,
-		hInstance,
+		GetModuleHandle(0), //substitute of hInstance
 		NULL);
 
 	ShowWindow(hWnd, nCmdShow);
+	//
 
 	// set up and initialize Direct3D
 	initD3D(hWnd);
@@ -83,6 +85,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	return msg.wParam;
 }
 
+//Wtf
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -96,6 +99,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
+//
 
 void initD3D(HWND hwnd)
 {
@@ -107,6 +111,9 @@ void initD3D(HWND hwnd)
 	d3dpp.Windowed = TRUE;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD; // DOUBLE BUFFERINg yay
 	d3dpp.hDeviceWindow = hwnd;
+	d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8; //back buffer format at 32-bit, no alpha channel
+	d3dpp.BackBufferWidth = SCREEN_WIDTH;	//BUFFER WIDTH
+	d3dpp.BackBufferHeight = SCREEN_HEIGHT; //buffer height
 
 	d3d->CreateDevice(
 		D3DADAPTER_DEFAULT,
